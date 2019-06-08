@@ -154,7 +154,7 @@ edx %>%
 ```
 
 
-Some movies have been rated moch often that other, while some have very few ratings and sometimes only one rating. This will be important for our model as very low rating numbers might results in untrustworthy estimate for our predictions. Almost 125 movies have been rated only once. 
+Some movies have been rated much often than others, while some have very few ratings and sometimes even only one rating. This will be important for our model as very low rating numbers might results in untrustworthy estimate for our predictions. Almost 125 movies have been rated only once. 
 
 
 ```{r number_of_ratings_per_movie, echo = TRUE, fig.height=4, fig.width=5}
