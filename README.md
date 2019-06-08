@@ -6,7 +6,7 @@ HarvardX: PH125.9x Capstone Course for the Data Science Professional Certificate
 
 In this project I have developed a machine learning algorithm to create a movie recommendation system. It was created as a part of the first EdX Capstone assignment to use the MovieLens dataset for the purpose.
 
-The repository contains:
+The repository contains 3 files:
 
 movielens-project.Rmd -> This is the project report in RMD format
 
