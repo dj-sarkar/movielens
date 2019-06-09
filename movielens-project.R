@@ -85,8 +85,8 @@ edx_upd %>%
   geom_histogram(binwidth = 0.25, color = "blue") +
   scale_x_discrete(limits = c(seq(0.5,5,0.5))) +
   scale_y_continuous(breaks = c(seq(0, 3000000, 500000))) +
-  xlab("Number of Ratings") +
-  ylab("Rating") +
+  xlab("Rating") +
+  ylab("Number of Ratings") +
   ggtitle("Rating Distribution")
 
 # Plot number of ratings per movie
