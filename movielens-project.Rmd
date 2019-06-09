@@ -5,7 +5,7 @@ date: "6/7/2019"
 output: pdf_document
 ---
 
-```{r}
+```{r, echo = FALSE}
 knitr::opts_chunk$set(message = FALSE, echo = TRUE)
 ```
 
@@ -16,9 +16,9 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 ## Overview
 
-This project is related to the MovieLens Project of the HarvardX: PH125.9x Data Science: Capstone project The present report starts with a general idea of the project and by representing its objective.
+This project is related to the MovieLens Project of the HarvardX: PH125.9x Data Science: Capstone project. The present report starts with a general idea of the project and by representing its objective.
 
-Then the given dataset will be prepared and setup. An exploratory data analysis is carried out in order to develop a machine learning algorithm that could predict movie ratings until a final model. Results will be explained. Finally the report ends with some concluding remarks.
+Then the given dataset will be prepared and setup. An exploratory data analysis is carried out in order to develop a machine learning recommendation system that can predict movie ratings. Results will be explained. Finally the report ends with some concluding remarks.
 
 
 
@@ -26,19 +26,18 @@ Then the given dataset will be prepared and setup. An exploratory data analysis 
 
 Recommendation systems use ratings that users have given to items to make specific recommendations. Companies that sell many products to many customers and permit these customers to rate their products, like Amazon, are able to collect massive datasets that can be used to predict what rating a particular user will give to a specific item. Items for which a high rating is predicted for a given user are then recommended to that user. 
 
-The same could be done for other items, as movies for instance in our case. Recommendation systems are one of the most used models in machine learning algorithms. In fact the success of Netflix is said to be based on its strong recommendation system. The Netflix prize (open competition for the best collaborative filtering algorithm to predict user ratings for films, based on previous ratings without any other information about the users or films), in fact, represent the high importance of algorithm for products recommendation system.
+The same could be done for other items, as movies for instance in our case. Recommendation systems are one of the most used models in machine learning algorithms, for example in Netflix or Amazon. 
+For this project we will focus on creating a movie recommendation system using the 10M version of MovieLens dataset, collected by GroupLens Research.
 
-For this project we will focus on create a movie recommendation system using the 10M version of MovieLens dataset, collected by GroupLens Research.
-
-Github - "https://github.com/dj-sarkar/movielens"
+Github - <https://github.com/dj-sarkar/movielens>
 
 
 ## Aim of the project
 
-The aim in this project is to train a machine learning algorithm that predicts user ratings (from 0.5 to 5 stars) using the inputs of a provided subset.
+The aim of this project is to train a machine learning algorithm that predicts user ratings (from 0.5 to 5 stars) using the inputs of a provided subset.
 
 The value used to evaluate algorithm performance is the Root Mean Square Error, or RMSE. RMSE is one of the most used measure of the differences between values predicted by a model and the values observed. RMSE is a measure of accuracy, to compare forecasting errors of different models for a particular dataset, a lower RMSE is better than a higher one. The effect of each error on RMSE is proportional to the size of the squared error; thus larger errors have a disproportionately large effect on RMSE. Consequently, RMSE is sensitive to outliers.
-The evaluation criteria for this algorithm is a RMSE expected to be lower than 0.8775.
+The evaluation criteria for the recommender is an expected RMSE lower than 0.8775.
 
 
 ```{r RMSE_function1, echo = FALSE}
@@ -147,7 +146,9 @@ nrow(validation)
 ```
 
 
-Users have a preference to rate movies rather higher than lower as shown by the distribution of ratings below. 4 is the most common rating, followed by 3 and 5. 0.5 is the least common rating. In general, half rating are less common than whole star ratings.
+## Data Analysis
+
+This section shows some analysis performed on the datasets.
 
 ```{r rating_distribution, echo = FALSE}
 
@@ -162,8 +163,8 @@ edx %>%
 
 ```
 
+Users have a preference to rate movies rather higher than lower as shown by the distribution of ratings below. 4 is the most common rating, followed by 3 and 5. 0.5 is the least common rating. In general, half rating are less common than whole star ratings.
 
-Some movies have been rated much often than others, while some have very few ratings and sometimes even only one rating. This will be important for our model as very low rating numbers might results in untrustworthy estimate for our predictions. Almost 125 movies have been rated only once. 
 
 ```{r number_of_ratings_per_movie, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -178,8 +179,8 @@ ggtitle("Number of Ratings per Movie")
 
 ```
 
+Some movies have been rated much often than others, while some have very few ratings and sometimes even only one rating. This will be important for our model as very low rating numbers might results in untrustworthy estimate for our predictions. Almost 125 movies have been rated only once. 
 
-Some 20 movies were rated only once and appear to be obscure, predictions of future ratings for them will be difficult.
 
 ```{r obscure_movies, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -195,8 +196,8 @@ edx %>%
   
 ```
 
+Some 20 movies were rated only once and appear to be obscure, predictions of future ratings for them will be difficult.
 
-One can observe that the majority of users have rated between 30 and 100 movies. So, a user penalty term needs to be included later in our models.
 
 ```{r number_ratings_given_by_users, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -210,8 +211,8 @@ ylab("Number of Users") +
 ggtitle("Number of Ratings given by Users")
 ```
 
+One can observe that the majority of users have rated between 30 and 100 movies. 
 
-Furthermore, users differ vastly in how critical they are with their ratings. Some users tend to give much lower star ratings and some users tend to give higher star ratings than average. The visualization below includes only users that have rated at least 100 movies.
 
 ```{r mean_movie_ratings_given_by_users, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -228,9 +229,11 @@ edx %>%
   
 ```
 
+Furthermore, users differ vastly in how critical they are with their ratings. Some users tend to give much lower star ratings and some users tend to give higher star ratings than average. The visualization below includes only users that have rated at least 100 movies.
 
 
 ## Modelling Approach
+
 
 The loss-function, that computes the RMSE is defined as follows:
 
@@ -299,8 +302,6 @@ To improve above model one can focus on the fact that some movies are just gener
 
 $$Y_{u, i} = \mu +b_{i}+ \epsilon_{u, i}$$
 
-The histogram is left skewed, implying that more movies have negative effects
-
 
 ```{r Number_of_movies_with_computed_b_i, echo = TRUE, fig.height=3, fig.width=4}
 
@@ -314,8 +315,9 @@ movie_avgs %>% qplot(b_i, geom ="histogram", bins = 10,
 
 ```
 
-
+The histogram is left skewed, implying that more movies have negative effects
 This is called the penalty term movie effect.
+
 
 Our prediction can improve once prediction is done using this model.
 
@@ -352,10 +354,9 @@ user_avgs%>% qplot(b_u, geom ="histogram",
                    bins = 30, data = ., color = I("blue"), 
                    ylab = "Number of Movies", 
                    main = "Movie and User Effect Model")
-
 ```
 
-There is substantial variability across users as well: some users are very cranky and other love every movie. This implies that further improvement to our model my be:
+There is substantial variability across users as well: some users are very cranky and others love every movie. This implies that further improvement to the model may be:
 $$Y_{u, i} = \mu + b_{i} + b_{u} + \epsilon_{u, i}$$
 where $b_{u}$ is a user-specific effect. If a cranky user (negative $b_{u}$ rates a great movie (positive $b_{i}$), the effects counter each other and we may be able to correctly predict that this user gave this great movie a 3 rather than a 5.
 
@@ -390,7 +391,7 @@ rmse_results %>% knitr::kable()
 ```
 
 
-Our rating predictions further reduced the RMSE, But still, mistakes were made on our first model (using only movies). The supposed “best “ and “worst “movie were rated by few users, in most cases just one user. These movies were mostly obscure ones. This is because with a few users, more uncertainty is created. Therefore larger estimates of $b_{i}$, negative or positive, are more likely. 
+Our rating predictions further reduced the RMSE, But still, mistakes were made on our first model (using only movies). The supposed "best" and "worst" movies were rated by few users, in most cases just one user. These movies were mostly obscure ones. This is because with a few users, more uncertainty is created. Therefore larger estimates of $b_{i}$, negative or positive, are more likely. 
 
 Until now, the computed standard error and constructed confidence intervals account for different levels of uncertainty. The concept of regularization permits to penalize large estimates that come from small sample sizes. The general idea is to add a penalty for large values of $b_{i}$ to the sum of squares equation that we minimize. So having many large $b_{i}$, make it harder to minimize. Regularization is a method used to reduce the effect of overfitting.
 
@@ -466,7 +467,7 @@ rmse_results %>% knitr::kable()
 
 The RMSE values of all the represented models are the following:
 
-```{r rmse_results3, echo = FALSE}
+```{r rmse_results3, echo = TRUE}
 
 rmse_results %>% knitr::kable()
 
@@ -486,6 +487,6 @@ This model will work well if the average user doesn't rate a particularly good/p
 
 ## Conclusion
 
-A machine learning algorithm has been successfully built to predict movie ratings with MovieLens dataset.
-The optimal model (Regularized Model) characterised by the lowest RMSE value (0.8648170) lower than the initial evaluation criteria (0.8775) given by the goal of the present project is thus the optimal selection.
+A machine learning model has been successfully built to predict movie ratings with MovieLens dataset.
+The optimal model (Regularized Model) characterised by the lowest RMSE value (0.8648170) is thus the optimal selection. This is lower than the initial evaluation criterion (0.8775) given by the goal of the present project.
 

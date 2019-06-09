@@ -1,7 +1,7 @@
 ## Dibyajyoti Sarkar
 ## MovieLens Project 
 ## HarvardX: PH125.9x - Capstone Project
-## https://github.com/dj-sarkar/
+## https://github.com/dj-sarkar/movielens
 
 #################################################
 # MovieLens Rating Prediction Project Code 
