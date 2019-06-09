@@ -1,5 +1,5 @@
 ---
-title: "movielens-project.Rmd"
+title: "Movie Recommendation System using MovieLens data"
 author: "Dibyajyoti Sarkar"
 date: "6/7/2019"
 output: pdf_document
@@ -16,9 +16,10 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 ## Overview
 
-This project is related to the MovieLens Project of the HervardX: PH125.9x Data Science: Capstone course. The present report start with a general idea of the project and by representing its objectif.
+This project is related to the MovieLens Project of the HarvardX: PH125.9x Data Science: Capstone project The present report starts with a general idea of the project and by representing its objective.
 
 Then the given dataset will be prepared and setup. An exploratory data analysis is carried out in order to develop a machine learning algorithm that could predict movie ratings until a final model. Results will be explained. Finally the report ends with some concluding remarks.
+
 
 
 ## Introduction
@@ -28,6 +29,8 @@ Recommendation systems use ratings that users have given to items to make specif
 The same could be done for other items, as movies for instance in our case. Recommendation systems are one of the most used models in machine learning algorithms. In fact the success of Netflix is said to be based on its strong recommendation system. The Netflix prize (open competition for the best collaborative filtering algorithm to predict user ratings for films, based on previous ratings without any other information about the users or films), in fact, represent the high importance of algorithm for products recommendation system.
 
 For this project we will focus on create a movie recommendation system using the 10M version of MovieLens dataset, collected by GroupLens Research.
+
+Github - "https://github.com/dj-sarkar/movielens"
 
 
 ## Aim of the project
@@ -62,34 +65,38 @@ The MovieLens dataset is automatically downloaded
 ##############################################################
 # Create edx set, validation set, and submission file
 #############################################################
-# Note: this process could take a couple of minutes for loading required package: tidyverse and package caret
-if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
-if(!require(caret)) install.packages("caret", repos = "http://cran.us.r-project.org")
+# Note: this process could take a couple of minutes for loading required package: 
+# tidyverse and package caret
+if(!require(tidyverse)) install.packages("tidyverse", 
+                                         repos = "http://cran.us.r-project.org")
+if(!require(caret)) install.packages("caret", 
+                                     repos = "http://cran.us.r-project.org")
 dl <- tempfile()
 download.file("http://files.grouplens.org/datasets/movielens/ml-10m.zip", dl)
 
-ratings <- read.table(text = gsub("::", "\t", readLines(unzip(dl, "ml-10M100K/ratings.dat"))),
+ratings <- read.table(text = gsub("::", "\t", 
+                                  readLines(unzip(dl, "ml-10M100K/ratings.dat"))),
                       col.names = c("userId", "movieId", "rating", "timestamp"))
 
 movies <- str_split_fixed(readLines(unzip(dl, "ml-10M100K/movies.dat")), "\\::", 3)
 colnames(movies) <- c("movieId", "title", "genres")
 
-movies <- as.data.frame(movies) %>% mutate(movieId = as.numeric(levels(movieId))[movieId],
+movies <- as.data.frame(movies) %>% 
+  mutate(movieId = as.numeric(levels(movieId))[movieId],
                                            title = as.character(title),
                                            genres = as.character(genres))
 movielens <- left_join(ratings, movies, by = "movieId")
 ```
 
 
-
-
-In order to predict in the most possible accurate way the movie rating of the users that haven’t seen the movie yet, the he MovieLens dataset will be splitted into 2 subsets that will be the “edx”, a training subset to train the algorithm, and “validation” a subset to test the movie ratings.  
+In order to predict in the most possible accurate way the movie rating of the users that haven’t seen the movie yet, the MovieLens dataset will be split into 2 subsets that will be the “edx”, a training subset to train the algorithm, and “validation” a subset to test the movie ratings.  
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE, eval = TRUE}
 
 # The Validation subset will be 10% of the MovieLens data.
 set.seed(1)
-test_index <- createDataPartition(y = movielens$rating, times = 1, p = 0.1, list = FALSE)
+test_index <- createDataPartition(y = movielens$rating, 
+                                  times = 1, p = 0.1, list = FALSE)
 edx <- movielens[-test_index,]
 temp <- movielens[test_index,]
 #Make sure userId and movieId in validation set are also in edx subset:
@@ -109,10 +116,13 @@ rm(dl, ratings, movies, test_index, temp, movielens, removed)
 # Summary of the edx dataset confirms no missing values
 summary(edx)
 
-# First entries of the edx dataset. The subset contain the six variables “userID”, “movieID”, “rating”, “timestamp”, “title”, and “genres”. Each row represent a single rating of a user for a single movie.
+# First entries of the edx dataset. The subset contain the 
+# six variables “userID”, “movieID”, “rating”, “timestamp”, “title”, and “genres”.
+# Each row represent a single rating of a user for a single movie.
 head(edx)
 
-# Checking the edx dataset properties. The total of unique movies and users in the edx subset is about 70.000 unique users and about 10.700 different movies
+# Checking the edx dataset properties. The total of unique movies and users in 
+# the edx subset is about 70.000 unique users and about 10.700 different movies
 n_distinct(edx$movieId)
 n_distinct(edx$genres)
 n_distinct(edx$userId)
@@ -132,10 +142,9 @@ head(validation)
 n_distinct(validation$movieId)
 n_distinct(validation$genres)
 n_distinct(validation$userId)
-nrow(edx)
+nrow(validation)
 
 ```
-
 
 
 Users have a preference to rate movies rather higher than lower as shown by the distribution of ratings below. 4 is the most common rating, followed by 3 and 5. 0.5 is the least common rating. In general, half rating are less common than whole star ratings.
@@ -147,15 +156,14 @@ edx %>%
   geom_histogram(binwidth = 0.25, color = "blue") +
   scale_x_discrete(limits = c(seq(0.5,5,0.5))) +
   scale_y_continuous(breaks = c(seq(0, 3000000, 500000))) +
-  xlab("Number of Ratings") +
-  ylab("Rating") +
+  xlab("Rating") +
+  ylab("Number of Ratings") +
   ggtitle("Rating Distribution")
 
 ```
 
 
 Some movies have been rated much often than others, while some have very few ratings and sometimes even only one rating. This will be important for our model as very low rating numbers might results in untrustworthy estimate for our predictions. Almost 125 movies have been rated only once. 
-
 
 ```{r number_of_ratings_per_movie, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -171,9 +179,7 @@ ggtitle("Number of Ratings per Movie")
 ```
 
 
-
 Some 20 movies were rated only once and appear to be obscure, predictions of future ratings for them will be difficult.
-
 
 ```{r obscure_movies, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -193,7 +199,7 @@ edx %>%
 One can observe that the majority of users have rated between 30 and 100 movies. So, a user penalty term needs to be included later in our models.
 
 ```{r number_ratings_given_by_users, echo = TRUE, fig.height=4, fig.width=5}
-# Plot number of ratings given by users
+
 edx %>%
 count(userId) %>%
 ggplot(aes(n)) +
@@ -206,7 +212,6 @@ ggtitle("Number of Ratings given by Users")
 
 
 Furthermore, users differ vastly in how critical they are with their ratings. Some users tend to give much lower star ratings and some users tend to give higher star ratings than average. The visualization below includes only users that have rated at least 100 movies.
-
 
 ```{r mean_movie_ratings_given_by_users, echo = TRUE, fig.height=4, fig.width=5}
 
@@ -225,7 +230,6 @@ edx %>%
 
 
 
-
 ## Modelling Approach
 
 The loss-function, that computes the RMSE is defined as follows:
@@ -236,7 +240,6 @@ with N being the number of user/movie combinations and the sum occurring over al
 The RMSE is our measure of model accuracy.
 
 The written function to compute the RMSE for vectors of ratings and their corresponding predictions is:
-
 
 ```{r RMSE_function2, echo = TRUE}
 
@@ -279,7 +282,8 @@ Here, we represent results table with the first RMSE:
 
 ```{r rmse_results1, echo = TRUE}
 
-rmse_results <- data_frame(method = "Average Movie Rating Model", RMSE = model_1_rmse)
+rmse_results <- data_frame(method = "Average Movie Rating Model",
+                           RMSE = model_1_rmse)
 rmse_results %>% knitr::kable()
 
 ```
@@ -303,8 +307,10 @@ The histogram is left skewed, implying that more movies have negative effects
 movie_avgs <- edx %>%
   group_by(movieId) %>%
   summarize(b_i = mean(rating - mu))
-movie_avgs %>% qplot(b_i, geom ="histogram", bins = 10, data = ., color = I("blue"),
-ylab = "Number of Movies", main = "Number of Movies with Computed b_i")
+movie_avgs %>% qplot(b_i, geom ="histogram", bins = 10, 
+                     data = ., color = I("blue"),
+                     ylab = "Number of Movies", 
+                     main = "Number of Movies with Computed b_i")
 
 ```
 
@@ -342,7 +348,10 @@ user_avgs<- edx %>%
   group_by(userId) %>%
   filter(n() >= 100) %>%
   summarize(b_u = mean(rating - mu - b_i))
-user_avgs%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("blue"), ylab = "Number of Movies", main = "Movie and User Effect Model")
+user_avgs%>% qplot(b_u, geom ="histogram", 
+                   bins = 30, data = ., color = I("blue"), 
+                   ylab = "Number of Movies", 
+                   main = "Movie and User Effect Model")
 
 ```
 
@@ -446,7 +455,8 @@ The new results will be:
 ```{r rmse_results2, echo = TRUE}
 
 rmse_results <- bind_rows(rmse_results,
-                          data_frame(method="Regularized Movie and User Effect Model",  
+                          data_frame(
+                            method="Regularized Movie and User Effect Model",  
                                      RMSE = min(model_4_rmse)))
 rmse_results %>% knitr::kable()
 
